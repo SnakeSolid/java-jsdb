@@ -4,11 +4,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ru.snake.jsdb.db.mapper.DbDummyMappers;
 import ru.snake.jsdb.db.mapper.DbMappers;
@@ -17,8 +15,6 @@ import ru.snake.jsdb.error.JsDbException;
 import ru.snake.jsdb.error.QueryExecutionException;
 
 public class Database implements Map<String, Object> {
-
-	private static final Logger LOG = LoggerFactory.getLogger(Database.class);
 
 	private final Connection connection;
 
@@ -46,29 +42,21 @@ public class Database implements Map<String, Object> {
 
 	@Override
 	public int size() {
-		LOG.info("Database::size unimplemented");
-
 		return 0;
 	}
 
 	@Override
 	public boolean isEmpty() {
-		LOG.info("Database::isEmpty unimplemented");
-
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean containsKey(Object key) {
-		LOG.info("Database::containsKey({}) unimplemented", key);
-
 		return false;
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		LOG.info("Database::containsValue({}) unimplemented", value);
-
 		return false;
 	}
 
@@ -102,17 +90,17 @@ public class Database implements Map<String, Object> {
 
 	@Override
 	public Set<String> keySet() {
-		throw new InvalidOperationError();
+		return Collections.emptySet();
 	}
 
 	@Override
 	public Collection<Object> values() {
-		throw new InvalidOperationError();
+		return Collections.emptySet();
 	}
 
 	@Override
 	public Set<Entry<String, Object>> entrySet() {
-		throw new InvalidOperationError();
+		return Collections.emptySet();
 	}
 
 	@Override
