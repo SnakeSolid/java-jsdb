@@ -14,23 +14,39 @@
 	<description>Command line interface for JSDB</description>
 
 	<properties>
+		<manifest.main.class>ru.snake.jsdb.Main</manifest.main.class>
+
 		<commons-cli.version>1.4</commons-cli.version>
 	</properties>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
+				<artifactId>maven-assembly-plugin</artifactId>
 
 				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>ru.snake.jsdb.Main</mainClass>
+							<mainClass>${manifest.main.class}</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
+
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
