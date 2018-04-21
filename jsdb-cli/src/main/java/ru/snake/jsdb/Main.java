@@ -151,8 +151,14 @@ public class Main {
 	}
 
 	private List<File> getScripts(CommandLine commandLine) {
-		List<File> scripts = Stream.of(commandLine.getOptionValues('s')).map(path -> new File(path)).collect(
-				Collectors.toList());
+		String[] scriptPaths = commandLine.getOptionValues('s');
+		List<File> scripts;
+
+		if (scriptPaths != null) {
+			scripts = Stream.of(scriptPaths).map(path -> new File(path)).collect(Collectors.toList());
+		} else {
+			scripts = Collections.emptyList();
+		}
 
 		return scripts;
 	}
