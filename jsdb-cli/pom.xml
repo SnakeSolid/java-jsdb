@@ -14,7 +14,7 @@
 	<description>Command line interface for JSDB</description>
 
 	<properties>
-		<manifest.main.class>ru.snake.jsdb.Main</manifest.main.class>
+		<manifest.main.class>ru.snake.jsdb.cli.Main</manifest.main.class>
 
 		<commons-cli.version>1.4</commons-cli.version>
 	</properties>
