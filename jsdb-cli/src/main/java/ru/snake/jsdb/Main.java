@@ -1,15 +1,10 @@
 package ru.snake.jsdb;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.snake.jsdb.error.JsDbException;
-import ru.snake.jsdb.error.ScriptExecutionException;
 import ru.snake.jsdb.settings.FieldMapping;
 import ru.snake.jsdb.settings.JsDbSettings;
 import ru.snake.jsdb.settings.TableMapping;
@@ -74,80 +68,21 @@ public class Main {
 
 		try (JsDbContext context = JsDbContextFactory.create(settings, connectionString)) {
 			for (File script : scripts) {
-				runScript(context, script);
+				new ScriptExecutor(context, script, System.out, System.err).run();
 			}
 
 			if (startRepl) {
-				runRepl(context);
+				new ReplExecutor(context, System.in, System.out, System.err).run();
 			}
 		}
 
 		return SUCCESS;
 	}
 
-	private void runScript(JsDbContext context, File script) throws IOException, FileNotFoundException {
-		try (FileReader reader = new FileReader(script)) {
-			try {
-				showResult(context.execute(reader));
-			} catch (ScriptExecutionException e) {
-				showError(e);
-			}
-		}
-	}
-
-	private void runRepl(JsDbContext context) throws IOException {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-			String line = reader.readLine();
-
-			while (line != null) {
-				line = reader.readLine();
-
-				try {
-					showResult(context.execute(line));
-				} catch (ScriptExecutionException e) {
-					showError(e);
-				}
-			}
-		}
-	}
-
 	private boolean getStartRepl(CommandLine commandLine) {
 		boolean nonInteractive = commandLine.hasOption('n');
 
 		return !nonInteractive;
-	}
-
-	private void showError(Throwable error) {
-		Throwable cause = error;
-
-		while (cause != null) {
-			LOG.warn(cause.getLocalizedMessage());
-
-			cause = cause.getCause();
-		}
-
-		for (Throwable suppressed : error.getSuppressed()) {
-			LOG.warn(suppressed.getLocalizedMessage());
-		}
-	}
-
-	private void showResult(Object result) {
-		if (result == null) {
-		} else if (result instanceof Iterable<?>) {
-			Iterable<?> iterable = (Iterable<?>) result;
-
-			iterable.forEach(System.out::println);
-		} else if (result instanceof Iterator<?>) {
-			Iterator<?> iterator = (Iterator<?>) result;
-
-			iterator.forEachRemaining(System.out::println);
-		} else if (result instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) result;
-
-			map.forEach((k, v) -> System.out.println(k + " -> " + v));
-		} else {
-			System.out.println(result);
-		}
 	}
 
 	private List<File> getScripts(CommandLine commandLine) {
