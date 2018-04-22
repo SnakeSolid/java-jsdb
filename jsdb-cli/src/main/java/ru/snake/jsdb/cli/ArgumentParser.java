@@ -132,39 +132,43 @@ public class ArgumentParser {
 	private static Options createOptions() {
 		Option libraries = Option.builder(LIBRARY_PATH)
 				.longOpt("library-path")
+				.argName("URL")
 				.hasArg()
-				.desc("Path to library JAR file")
+				.desc("URL to library JAR file (if path is local - `file://...`).")
 				.build();
 		Option driver = Option.builder(JDBC_DRIVER)
 				.longOpt("driver")
+				.argName("CLASS")
 				.required()
 				.hasArg()
 				.desc("JDBC driver class name")
 				.build();
 		Option fields = Option.builder(FIELD_MAPPER)
 				.longOpt("field")
-				.argName("table.field")
+				.argName("TABLE.FIELD=CLASS")
 				.numberOfArgs(2)
 				.valueSeparator()
-				.desc("Field mapper class name (table.field=class)")
+				.desc("Mapper class name for single table field. Filed represents full field name in particular table.")
 				.build();
 		Option tags = Option.builder(TAG_MAPPER)
 				.longOpt("tag")
-				.argName("tag")
+				.argName("TAG=CLASS")
 				.numberOfArgs(2)
 				.valueSeparator()
-				.desc("Tag mapper class name (tag=class)")
+				.desc("Mapper class name for single tag. Tag represents full column name in query results (db.execute)")
 				.build();
 		Option url = Option.builder(JDBC_URL)
 				.longOpt("url")
+				.argName("JDBC_URL")
 				.required()
 				.hasArg()
-				.desc("JDBC database URL to connect")
+				.desc("JDBC database URL to connect.")
 				.build();
 		Option script = Option.builder(SCRIPT_PATH)
 				.longOpt("script")
+				.argName("PATH")
 				.hasArg()
-				.desc("Execute file in database context")
+				.desc("Execute file in database context.")
 				.build();
 		Option noRepl = Option.builder(NO_REPL).longOpt("no-repl").desc("Do not start REPL").build();
 
