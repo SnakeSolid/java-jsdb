@@ -40,6 +40,14 @@ public final class JsDbContext implements AutoCloseable {
 			return engine.eval(reader);
 		} catch (ScriptException e) {
 			throw new ScriptExecutionException(e);
+		} catch (RuntimeException e) {
+			Throwable cause = e.getCause();
+
+			if (cause != null && cause instanceof ScriptExecutionException) {
+				throw (ScriptExecutionException) cause;
+			}
+
+			throw e;
 		}
 	}
 

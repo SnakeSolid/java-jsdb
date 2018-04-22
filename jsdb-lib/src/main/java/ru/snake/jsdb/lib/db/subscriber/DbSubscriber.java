@@ -1,12 +1,12 @@
 package ru.snake.jsdb.lib.db.subscriber;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
+import ru.snake.jsdb.lib.error.ScriptExecutionException;
 import ru.snake.jsdb.lib.flow.Publisher;
 import ru.snake.jsdb.lib.flow.Subscriber;
 
-public abstract class DbSubscriber<T, R> implements Subscriber<T>, Supplier<R> {
+public abstract class DbSubscriber<T, R> implements Subscriber<T> {
 
 	protected final Publisher<T> publisher;
 
@@ -14,6 +14,7 @@ public abstract class DbSubscriber<T, R> implements Subscriber<T>, Supplier<R> {
 
 	public DbSubscriber(Publisher<T> publisher) {
 		this.publisher = publisher;
+		this.error = Optional.empty();
 
 		publisher.subscribe(this);
 	}
@@ -28,12 +29,12 @@ public abstract class DbSubscriber<T, R> implements Subscriber<T>, Supplier<R> {
 	public void onComplete() {
 	}
 
-	public final R get() {
+	public final R get() throws ScriptExecutionException {
 		this.publisher.consume();
 
 		return getResult();
 	}
 
-	protected abstract R getResult();
+	protected abstract R getResult() throws ScriptExecutionException;
 
 }

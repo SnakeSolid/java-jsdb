@@ -3,6 +3,7 @@ package ru.snake.jsdb.lib.db.subscriber;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.snake.jsdb.lib.error.ScriptExecutionException;
 import ru.snake.jsdb.lib.flow.Publisher;
 
 public final class CollectSubscriber<T> extends DbSubscriber<T, List<T>> {
@@ -21,7 +22,11 @@ public final class CollectSubscriber<T> extends DbSubscriber<T, List<T>> {
 	}
 
 	@Override
-	protected List<T> getResult() {
+	protected List<T> getResult() throws ScriptExecutionException {
+		if (this.error.isPresent()) {
+			throw new ScriptExecutionException(this.error.get());
+		}
+
 		return this.items;
 	}
 

@@ -2,6 +2,7 @@ package ru.snake.jsdb.lib.db.subscriber;
 
 import java.util.function.BiFunction;
 
+import ru.snake.jsdb.lib.error.ScriptExecutionException;
 import ru.snake.jsdb.lib.flow.Publisher;
 
 public final class FoldSubscriber<A, T> extends DbSubscriber<T, A> {
@@ -23,7 +24,11 @@ public final class FoldSubscriber<A, T> extends DbSubscriber<T, A> {
 	}
 
 	@Override
-	protected A getResult() {
+	protected A getResult() throws ScriptExecutionException {
+		if (this.error.isPresent()) {
+			throw new ScriptExecutionException(this.error.get());
+		}
+
 		return this.accumulator;
 	}
 

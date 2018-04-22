@@ -31,15 +31,22 @@ public abstract class AbstractExecutor {
 			}
 
 			cause = cause.getCause();
+			level += 1;
 		}
 	}
 
 	private String makeIdent(int level) {
+		if (level == 0) {
+			return "";
+		}
+
 		StringBuilder builder = new StringBuilder(2 * level);
 
-		for (int i = 0; i < level; i += 1) {
+		for (int i = 0; i < level - 1; i += 1) {
 			builder.append("  ");
 		}
+
+		builder.append("> ");
 
 		return builder.toString();
 	}

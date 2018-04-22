@@ -3,6 +3,7 @@ package ru.snake.jsdb.lib.db.subscriber;
 import java.util.HashSet;
 import java.util.Set;
 
+import ru.snake.jsdb.lib.error.ScriptExecutionException;
 import ru.snake.jsdb.lib.flow.Publisher;
 
 public final class DistinctSubscriber<T> extends DbSubscriber<T, Set<T>> {
@@ -21,7 +22,11 @@ public final class DistinctSubscriber<T> extends DbSubscriber<T, Set<T>> {
 	}
 
 	@Override
-	protected Set<T> getResult() {
+	protected Set<T> getResult() throws ScriptExecutionException {
+		if (this.error.isPresent()) {
+			throw new ScriptExecutionException(this.error.get());
+		}
+
 		return this.items;
 	}
 

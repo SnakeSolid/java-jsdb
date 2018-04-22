@@ -12,6 +12,7 @@ import ru.snake.jsdb.lib.db.subscriber.CountSubscriber;
 import ru.snake.jsdb.lib.db.subscriber.DistinctSubscriber;
 import ru.snake.jsdb.lib.db.subscriber.EachSubscriber;
 import ru.snake.jsdb.lib.db.subscriber.FoldSubscriber;
+import ru.snake.jsdb.lib.error.ScriptExecutionException;
 import ru.snake.jsdb.lib.flow.Publisher;
 
 public abstract class DbPublisher<T> extends Publisher<T> {
@@ -32,23 +33,23 @@ public abstract class DbPublisher<T> extends Publisher<T> {
 		return new FilterProcessor<>(this, filter);
 	}
 
-	public <A> A fold(A accumulator, BiFunction<A, T, A> reducer) {
+	public <A> A fold(A accumulator, BiFunction<A, T, A> reducer) throws ScriptExecutionException {
 		return new FoldSubscriber<>(this, accumulator, reducer).get();
 	}
 
-	public Void forEach(Consumer<T> consumer) {
+	public Void forEach(Consumer<T> consumer) throws ScriptExecutionException {
 		return new EachSubscriber<>(this, consumer).get();
 	}
 
-	public List<T> collect() {
+	public List<T> collect() throws ScriptExecutionException {
 		return new CollectSubscriber<>(this).get();
 	}
 
-	public Set<T> distinct() {
+	public Set<T> distinct() throws ScriptExecutionException {
 		return new DistinctSubscriber<>(this).get();
 	}
 
-	public Integer count() {
+	public Integer count() throws ScriptExecutionException {
 		return new CountSubscriber<>(this).get();
 	}
 

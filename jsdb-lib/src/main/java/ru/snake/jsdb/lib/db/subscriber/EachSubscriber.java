@@ -2,6 +2,7 @@ package ru.snake.jsdb.lib.db.subscriber;
 
 import java.util.function.Consumer;
 
+import ru.snake.jsdb.lib.error.ScriptExecutionException;
 import ru.snake.jsdb.lib.flow.Publisher;
 
 public final class EachSubscriber<T> extends DbSubscriber<T, Void> {
@@ -20,7 +21,11 @@ public final class EachSubscriber<T> extends DbSubscriber<T, Void> {
 	}
 
 	@Override
-	protected Void getResult() {
+	protected Void getResult() throws ScriptExecutionException {
+		if (this.error.isPresent()) {
+			throw new ScriptExecutionException(this.error.get());
+		}
+
 		return null;
 	}
 

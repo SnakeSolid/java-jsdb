@@ -1,5 +1,6 @@
 package ru.snake.jsdb.lib.db.subscriber;
 
+import ru.snake.jsdb.lib.error.ScriptExecutionException;
 import ru.snake.jsdb.lib.flow.Publisher;
 
 public final class CountSubscriber<T> extends DbSubscriber<T, Integer> {
@@ -18,7 +19,11 @@ public final class CountSubscriber<T> extends DbSubscriber<T, Integer> {
 	}
 
 	@Override
-	protected Integer getResult() {
+	protected Integer getResult() throws ScriptExecutionException {
+		if (this.error.isPresent()) {
+			throw new ScriptExecutionException(this.error.get());
+		}
+
 		return this.count;
 	}
 
