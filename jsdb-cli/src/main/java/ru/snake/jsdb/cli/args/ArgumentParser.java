@@ -1,10 +1,6 @@
-package ru.snake.jsdb.cli;
+package ru.snake.jsdb.cli.args;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.cli.CommandLine;
@@ -13,17 +9,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ru.snake.jsdb.lib.settings.FieldMapping;
-import ru.snake.jsdb.lib.settings.JsDbSettings;
-import ru.snake.jsdb.lib.settings.TableMapping;
-import ru.snake.jsdb.lib.settings.TagMapping;
 
 public class ArgumentParser {
-
-	private static final Logger LOG = LoggerFactory.getLogger(ArgumentParser.class);
 
 	private static final String NO_REPL = "n";
 	private static final String SCRIPT_PATH = "s";
@@ -32,6 +19,7 @@ public class ArgumentParser {
 	private static final String FIELD_MAPPER = "f";
 	private static final String JDBC_DRIVER = "d";
 	private static final String LIBRARY_PATH = "l";
+	private static final String CONFIG_PATH = "c";
 
 	private final Options options;
 
@@ -42,77 +30,43 @@ public class ArgumentParser {
 		this.commandLine = commandLine;
 	}
 
-	public boolean isSuccess() {
-		return this.commandLine != null;
-	}
-
 	public void printHelp() {
 		HelpFormatter formatter = new HelpFormatter();
 
 		formatter.printHelp("jsdb-cli", this.options);
 	}
 
-	public boolean noRepl() {
-		return this.commandLine.hasOption(NO_REPL);
-	}
+	public Arguments getArguments() {
+		Arguments arguments = new Arguments();
 
-	public List<File> getScripts() {
-		String[] scriptPaths = this.commandLine.getOptionValues(SCRIPT_PATH);
-		List<File> scripts;
+		if (this.commandLine != null) {
+			String config = this.commandLine.getOptionValue(CONFIG_PATH);
+			String driver = this.commandLine.getOptionValue(JDBC_DRIVER);
+			String url = this.commandLine.getOptionValue(JDBC_URL);
+			String[] libraryPaths = this.commandLine.getOptionValues(LIBRARY_PATH);
+			String[] scriptPaths = this.commandLine.getOptionValues(SCRIPT_PATH);
+			Properties fields = this.commandLine.getOptionProperties(FIELD_MAPPER);
+			Properties tags = this.commandLine.getOptionProperties(TAG_MAPPER);
+			boolean noRelp = this.commandLine.hasOption(NO_REPL);
 
-		if (scriptPaths != null) {
-			scripts = Stream.of(scriptPaths).map(path -> new File(path)).collect(Collectors.toList());
-		} else {
-			scripts = Collections.emptyList();
+			arguments.setConfigPath(config);
+			arguments.setJdbcDriver(driver);
+			arguments.setJdbcUrl(url);
+			arguments.setNoRepl(noRelp);
+
+			if (libraryPaths != null) {
+				Stream.of(libraryPaths).forEach(arguments::addLibraryPath);
+			}
+
+			if (scriptPaths != null) {
+				Stream.of(scriptPaths).forEach(arguments::addScriptPath);
+			}
+
+			fields.forEach((key, value) -> arguments.addFieldMapper(String.valueOf(key), String.valueOf(value)));
+			tags.forEach((key, value) -> arguments.addTagMapper(String.valueOf(key), String.valueOf(value)));
 		}
 
-		return scripts;
-	}
-
-	public String getConnectionString() {
-		return this.commandLine.getOptionValue(JDBC_URL);
-	}
-
-	public JsDbSettings buildSettings() {
-		String driver = this.commandLine.getOptionValue(JDBC_DRIVER);
-		String[] libraryPaths = this.commandLine.getOptionValues(LIBRARY_PATH);
-		Properties fields = this.commandLine.getOptionProperties(FIELD_MAPPER);
-		Properties tags = this.commandLine.getOptionProperties(TAG_MAPPER);
-
-		JsDbSettings settings = new JsDbSettings();
-		settings.setLibraryPaths(Stream.of(libraryPaths).collect(Collectors.toSet()));
-		settings.setDrivers(Collections.singleton(driver));
-
-		TableMapping tableMapping = settings.getTableFieldMapping();
-
-		fields.forEach((key, value) -> {
-			String tableAndFiled = key.toString();
-			int dotPosition = tableAndFiled.lastIndexOf('.');
-
-			if (dotPosition != -1 && dotPosition > 0 && dotPosition < tableAndFiled.length()) {
-				String tableName = tableAndFiled.substring(0, dotPosition);
-				String fieldName = tableAndFiled.substring(dotPosition + 1);
-
-				if (tableMapping.contains(tableName)) {
-					FieldMapping fieldMapping = tableMapping.get(tableName);
-					fieldMapping.insert(fieldName, value.toString());
-				} else {
-					FieldMapping fieldMapping = new FieldMapping();
-					fieldMapping.insert(fieldName, value.toString());
-					tableMapping.insert(tableName, fieldMapping);
-				}
-			} else {
-				LOG.warn("Incorrect table filed definition in field mapping: `{}`", key);
-			}
-		});
-
-		TagMapping tagMapping = settings.getTagMapping();
-
-		tags.forEach((key, value) -> {
-			tagMapping.insert(key.toString(), value.toString());
-		});
-
-		return settings;
+		return arguments;
 	}
 
 	public static ArgumentParser parse(String[] args) {
@@ -130,6 +84,12 @@ public class ArgumentParser {
 	}
 
 	private static Options createOptions() {
+		Option config = Option.builder(CONFIG_PATH)
+				.longOpt("config")
+				.argName("PATH")
+				.hasArg()
+				.desc("Configuration file path.")
+				.build();
 		Option libraries = Option.builder(LIBRARY_PATH)
 				.longOpt("library-path")
 				.argName("URL")
@@ -139,7 +99,6 @@ public class ArgumentParser {
 		Option driver = Option.builder(JDBC_DRIVER)
 				.longOpt("driver")
 				.argName("CLASS")
-				.required()
 				.hasArg()
 				.desc("JDBC driver class name")
 				.build();
@@ -173,6 +132,7 @@ public class ArgumentParser {
 		Option noRepl = Option.builder(NO_REPL).longOpt("no-repl").desc("Do not start REPL").build();
 
 		Options options = new Options();
+		options.addOption(config);
 		options.addOption(libraries);
 		options.addOption(driver);
 		options.addOption(fields);

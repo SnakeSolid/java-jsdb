@@ -1,4 +1,4 @@
-package ru.snake.jsdb.cli;
+package ru.snake.jsdb.cli.executor;
 
 import java.io.File;
 import java.io.FileNotFoundException;

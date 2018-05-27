@@ -2,12 +2,20 @@ package ru.snake.jsdb.cli;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.snake.jsdb.cli.args.ArgumentParser;
+import ru.snake.jsdb.cli.args.Arguments;
+import ru.snake.jsdb.cli.config.ConfigReader;
+import ru.snake.jsdb.cli.config.Configuration;
+import ru.snake.jsdb.cli.executor.ReplExecutor;
+import ru.snake.jsdb.cli.executor.ScriptExecutor;
 import ru.snake.jsdb.lib.JsDbContext;
 import ru.snake.jsdb.lib.JsDbContextFactory;
 import ru.snake.jsdb.lib.error.JsDbException;
@@ -45,20 +53,35 @@ public class Main {
 
 	private int run(String[] args) throws JsDbException, FileNotFoundException, IOException {
 		ArgumentParser parser = ArgumentParser.parse(args);
+		Arguments arguments = parser.getArguments();
+		SettingsBuilder builder = new SettingsBuilder();
+		String configPath = arguments.getConfigPath();
 
-		if (!parser.isSuccess()) {
+		if (configPath != null) {
+			try (Reader reader = new FileReader(configPath)) {
+				Configuration config = ConfigReader.read(reader);
+
+				builder.withConfiguration(config);
+			}
+		}
+
+		builder.withArguments(arguments);
+
+		if (!builder.validate()) {
 			parser.printHelp();
 
 			return ERROR;
 		}
 
-		JsDbSettings settings = parser.buildSettings();
-		String connectionString = parser.getConnectionString();
-		List<File> scripts = parser.getScripts();
-		boolean noRepl = parser.noRepl();
+		JsDbSettings jsdbSettings = builder.build();
+		String connectionString = arguments.getJdbcUrl();
+		List<String> scriptPaths = arguments.getScriptPaths();
+		boolean noRepl = arguments.isNoRepl();
 
-		try (JsDbContext context = JsDbContextFactory.create(settings, connectionString)) {
-			for (File script : scripts) {
+		try (JsDbContext context = JsDbContextFactory.create(jsdbSettings, connectionString)) {
+			for (String scriptPath : scriptPaths) {
+				File script = new File(scriptPath);
+
 				new ScriptExecutor(context, script, System.out, System.err).run();
 			}
 
