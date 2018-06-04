@@ -1,37 +1,33 @@
 package ru.snake.jsdb.lib.flow;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 public abstract class Publisher<T> {
 
-	private final Collection<Subscriber<? super T>> subscribers;
+	private Subscriber<? super T> subscriber;
 
 	protected boolean cancelled;
 
 	public Publisher() {
-		this.subscribers = new ArrayList<>(1);
 		this.cancelled = false;
 	}
 
 	public void subscribe(Subscriber<? super T> subscriber) {
-		subscribers.add(subscriber);
+		this.subscriber = subscriber;
 	}
 
 	public void fireNext(T value) {
-		for (Subscriber<? super T> subscriber : this.subscribers) {
+		if (this.subscriber != null) {
 			subscriber.onNext(value);
 		}
 	}
 
 	public void fireError(Throwable error) {
-		for (Subscriber<? super T> subscriber : this.subscribers) {
+		if (this.subscriber != null) {
 			subscriber.onError(error);
 		}
 	}
 
 	public void fireComplete() {
-		for (Subscriber<? super T> subscriber : this.subscribers) {
+		if (this.subscriber != null) {
 			subscriber.onComplete();
 		}
 	}
