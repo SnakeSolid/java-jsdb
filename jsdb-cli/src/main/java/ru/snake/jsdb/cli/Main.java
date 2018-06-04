@@ -74,7 +74,7 @@ public class Main {
 		}
 
 		JsDbSettings jsdbSettings = builder.build();
-		String connectionString = arguments.getJdbcUrl();
+		String connectionString = builder.getJdbcUrl();
 		List<String> scriptPaths = arguments.getScriptPaths();
 		boolean noRepl = arguments.isNoRepl();
 

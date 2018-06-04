@@ -28,6 +28,12 @@ public class SettingsBuilder {
 
 	private Set<String> jdbcDrivers;
 
+	private String jdbcUrl;
+
+	/**
+	 * Create empty builder instance. Initially library paths is empty, all
+	 * mappers is empty, drivers is empty and connection string is {@code null}.
+	 */
 	public SettingsBuilder() {
 		this.libraryPaths = new HashSet<>();
 		this.fieldMappers = new HashMap<>();
@@ -35,9 +41,19 @@ public class SettingsBuilder {
 		this.jdbcDrivers = new HashSet<>();
 	}
 
+	/**
+	 * Update internal builder state with given CLI arguments. Library paths,
+	 * data mappers and drivers will be extended with configuration. Connection
+	 * string will be replaced with configured JDBC URL.
+	 *
+	 * @param arguments
+	 *            CLI arguments
+	 * @return current builder instance
+	 */
 	public SettingsBuilder withArguments(Arguments arguments) {
 		Map<String, String> argFieldMappers = arguments.getFieldMappers();
 		String jdbcDriver = arguments.getJdbcDriver();
+		String jdbcUrl = arguments.getJdbcUrl();
 
 		this.libraryPaths.addAll(arguments.getLibraryPaths());
 
@@ -60,12 +76,27 @@ public class SettingsBuilder {
 			this.jdbcDrivers.add(jdbcDriver);
 		}
 
+		if (jdbcUrl != null) {
+			this.jdbcUrl = jdbcUrl;
+		}
+
 		return this;
 	}
 
+	/**
+	 * Update internal builder state with given configuration parameters.
+	 * Library paths, data mappers and drivers will be extended with
+	 * configuration. Connection string will be replaced with configured JDBC
+	 * URL.
+	 *
+	 * @param config
+	 *            CLI configuration
+	 * @return current builder instance
+	 */
 	public SettingsBuilder withConfiguration(Configuration config) {
 		Map<String, Map<String, String>> confFieldMappers = config.getFieldMappers();
 		String jdbcDriver = config.getJdbcDriver();
+		String jdbcUrl = config.getJdbcUrl();
 
 		this.libraryPaths.addAll(config.getLibraryPaths());
 
@@ -76,6 +107,10 @@ public class SettingsBuilder {
 
 		if (jdbcDriver != null) {
 			this.jdbcDrivers.add(jdbcDriver);
+		}
+
+		if (jdbcUrl != null) {
+			this.jdbcUrl = jdbcUrl;
 		}
 
 		return this;
@@ -96,6 +131,12 @@ public class SettingsBuilder {
 			valid = false;
 		}
 
+		if (this.jdbcUrl == null) {
+			LOG.error("JDBC URL is empty");
+
+			valid = false;
+		}
+
 		return valid;
 	}
 
@@ -109,6 +150,16 @@ public class SettingsBuilder {
 		putTagMappers(settings);
 
 		return settings;
+	}
+
+	/**
+	 * Returns connection string URL if it's present otherwise returns
+	 * {@code null}.
+	 *
+	 * @return JDBC connection URL
+	 */
+	public String getJdbcUrl() {
+		return jdbcUrl;
 	}
 
 	private void putTagMappers(JsDbSettings settings) {

@@ -83,6 +83,11 @@ public class ArgumentParser {
 		return new ArgumentParser(null, options);
 	}
 
+	/**
+	 * Create and returns new {@link Options}.
+	 *
+	 * @return options instance
+	 */
 	private static Options createOptions() {
 		Option config = Option.builder(CONFIG_PATH)
 				.longOpt("config")
@@ -119,7 +124,6 @@ public class ArgumentParser {
 		Option url = Option.builder(JDBC_URL)
 				.longOpt("url")
 				.argName("JDBC_URL")
-				.required()
 				.hasArg()
 				.desc("JDBC database URL to connect.")
 				.build();
