@@ -16,7 +16,7 @@ import ru.snake.jsdb.lib.settings.JsDbSettings;
 import ru.snake.jsdb.lib.settings.TableMapping;
 import ru.snake.jsdb.lib.settings.TagMapping;
 
-public class SettingsBuilder {
+public final class SettingsBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsBuilder.class);
 
@@ -50,10 +50,10 @@ public class SettingsBuilder {
 	 *            CLI arguments
 	 * @return current builder instance
 	 */
-	public SettingsBuilder withArguments(Arguments arguments) {
+	public SettingsBuilder withArguments(final Arguments arguments) {
 		Map<String, String> argFieldMappers = arguments.getFieldMappers();
-		String jdbcDriver = arguments.getJdbcDriver();
-		String jdbcUrl = arguments.getJdbcUrl();
+		String argsDriver = arguments.getJdbcDriver();
+		String argsUrl = arguments.getJdbcUrl();
 
 		this.libraryPaths.addAll(arguments.getLibraryPaths());
 
@@ -72,12 +72,12 @@ public class SettingsBuilder {
 
 		this.tagMappers.putAll(arguments.getTagMappers());
 
-		if (jdbcDriver != null) {
-			this.jdbcDrivers.add(jdbcDriver);
+		if (argsDriver != null) {
+			this.jdbcDrivers.add(argsDriver);
 		}
 
-		if (jdbcUrl != null) {
-			this.jdbcUrl = jdbcUrl;
+		if (argsUrl != null) {
+			this.jdbcUrl = argsUrl;
 		}
 
 		return this;
@@ -93,10 +93,10 @@ public class SettingsBuilder {
 	 *            CLI configuration
 	 * @return current builder instance
 	 */
-	public SettingsBuilder withConfiguration(Configuration config) {
+	public SettingsBuilder withConfiguration(final Configuration config) {
 		Map<String, Map<String, String>> confFieldMappers = config.getFieldMappers();
-		String jdbcDriver = config.getJdbcDriver();
-		String jdbcUrl = config.getJdbcUrl();
+		String confogDriver = config.getJdbcDriver();
+		String configUrl = config.getJdbcUrl();
 
 		this.libraryPaths.addAll(config.getLibraryPaths());
 
@@ -105,12 +105,12 @@ public class SettingsBuilder {
 
 		this.tagMappers.putAll(config.getTagMappers());
 
-		if (jdbcDriver != null) {
-			this.jdbcDrivers.add(jdbcDriver);
+		if (confogDriver != null) {
+			this.jdbcDrivers.add(confogDriver);
 		}
 
-		if (jdbcUrl != null) {
-			this.jdbcUrl = jdbcUrl;
+		if (configUrl != null) {
+			this.jdbcUrl = configUrl;
 		}
 
 		return this;
