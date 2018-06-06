@@ -4,35 +4,66 @@ import java.util.Collections;
 import java.util.Set;
 
 import ru.snake.jsdb.lib.Preconditions;
+import ru.snake.jsdb.lib.error.InvalidDriverException;
+import ru.snake.jsdb.lib.error.JsDbException;
 
+/**
+ * Container for JSDB library settings.
+ *
+ * @author snake
+ *
+ */
 public class JsDbSettings {
 
 	private String engineMimeType;
 
 	private Set<String> libraryPaths;
 
-	private Set<String> drivers;
+	private String driver;
 
 	private TableMapping tableFieldMappers;
 
 	private TagMapping tagMapping;
 
+	/**
+	 * Create empty settings. Default engine type - JavaScript, default library
+	 * path - file:lib/, all mappers are empty.
+	 */
 	public JsDbSettings() {
 		this.engineMimeType = "application/javascript";
 		this.libraryPaths = Collections.singleton("file:lib/");
-		this.drivers = Collections.emptySet();
 		this.tableFieldMappers = new TableMapping();
 		this.tagMapping = new TagMapping();
 	}
 
-	public void validate() {
-		// TODO: complete method
+	/**
+	 * Validate settings. Throws {@link JsDbException} if some parameter has
+	 * invalid value.
+	 *
+	 * @throws InvalidDriverException
+	 *             if driver invalid
+	 */
+	public void validate() throws InvalidDriverException {
+		if (this.driver == null) {
+			throw new InvalidDriverException();
+		}
 	}
 
+	/**
+	 * Returns script engine MIME type.
+	 *
+	 * @return engine MIME type
+	 */
 	public String getEngineMimeType() {
 		return engineMimeType;
 	}
 
+	/**
+	 * Set script engine MIME type.
+	 *
+	 * @param engineMimeType
+	 *            engine MIME type
+	 */
 	public void setEngineMimeType(String engineMimeType) {
 		Preconditions.argumentNotNull(engineMimeType, "engineMimeType");
 		Preconditions.argumentNotEmpty(engineMimeType, "engineMimeType");
@@ -51,15 +82,14 @@ public class JsDbSettings {
 		this.libraryPaths = libraryPaths;
 	}
 
-	public Set<String> getDrivers() {
-		return drivers;
+	public String getDriver() {
+		return driver;
 	}
 
-	public void setDrivers(Set<String> drivers) {
-		Preconditions.argumentNotNull(drivers, "drivers");
-		Preconditions.argumentNotEmpty(drivers, "drivers");
+	public void setDriver(String driver) {
+		Preconditions.argumentNotNull(driver, "driver");
 
-		this.drivers = drivers;
+		this.driver = driver;
 	}
 
 	public TableMapping getTableFieldMapping() {
@@ -83,8 +113,8 @@ public class JsDbSettings {
 
 	@Override
 	public String toString() {
-		return "JsDbSettings [engineMimeType=" + engineMimeType + ", libraryPaths=" + libraryPaths + ", drivers="
-				+ drivers + ", tableFieldMappers=" + tableFieldMappers + ", tagMapping=" + tagMapping + "]";
+		return "JsDbSettings [engineMimeType=" + engineMimeType + ", libraryPaths=" + libraryPaths + ", driver="
+				+ driver + ", tableFieldMappers=" + tableFieldMappers + ", tagMapping=" + tagMapping + "]";
 	}
 
 }

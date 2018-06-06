@@ -16,6 +16,13 @@ import ru.snake.jsdb.lib.settings.JsDbSettings;
 import ru.snake.jsdb.lib.settings.TableMapping;
 import ru.snake.jsdb.lib.settings.TagMapping;
 
+/**
+ * JSDB command line utility settings builder. Contains actual setting values
+ * from both configuration file and arguments.
+ *
+ * @author snake
+ *
+ */
 public final class SettingsBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SettingsBuilder.class);
@@ -26,7 +33,7 @@ public final class SettingsBuilder {
 
 	private final Map<String, String> tagMappers;
 
-	private Set<String> jdbcDrivers;
+	private String jdbcDriver;
 
 	private String jdbcUrl;
 
@@ -38,7 +45,6 @@ public final class SettingsBuilder {
 		this.libraryPaths = new HashSet<>();
 		this.fieldMappers = new HashMap<>();
 		this.tagMappers = new HashMap<>();
-		this.jdbcDrivers = new HashSet<>();
 	}
 
 	/**
@@ -73,7 +79,7 @@ public final class SettingsBuilder {
 		this.tagMappers.putAll(arguments.getTagMappers());
 
 		if (argsDriver != null) {
-			this.jdbcDrivers.add(argsDriver);
+			this.jdbcDriver = argsDriver;
 		}
 
 		if (argsUrl != null) {
@@ -106,7 +112,7 @@ public final class SettingsBuilder {
 		this.tagMappers.putAll(config.getTagMappers());
 
 		if (confogDriver != null) {
-			this.jdbcDrivers.add(confogDriver);
+			this.jdbcDriver = confogDriver;
 		}
 
 		if (configUrl != null) {
@@ -116,6 +122,18 @@ public final class SettingsBuilder {
 		return this;
 	}
 
+	/**
+	 * Validate settings and returns <code>true</code> if all settings are
+	 * valid. Returns <code>false</code> if:
+	 *
+	 * <ul>
+	 * <li>library path is empty</li>
+	 * <li>JDBC driver is empty</li>
+	 * <li>JDBC URL is empty</li>
+	 * </ul>
+	 *
+	 * @return <code>true</code> if settings valid, otherwise <code>false</code>
+	 */
 	public boolean validate() {
 		boolean valid = true;
 
@@ -125,7 +143,7 @@ public final class SettingsBuilder {
 			valid = false;
 		}
 
-		if (this.jdbcDrivers.isEmpty()) {
+		if (this.jdbcDriver == null) {
 			LOG.error("JDBC drivers is empty");
 
 			valid = false;
@@ -140,11 +158,16 @@ public final class SettingsBuilder {
 		return valid;
 	}
 
+	/**
+	 * Create and return new instance of {@link JsDbSettings}.
+	 *
+	 * @return JSDB settings
+	 */
 	public JsDbSettings build() {
 		JsDbSettings settings = new JsDbSettings();
 
 		settings.setLibraryPaths(this.libraryPaths);
-		settings.setDrivers(this.jdbcDrivers);
+		settings.setDriver(this.jdbcDriver);
 
 		putFieldMappers(settings);
 		putTagMappers(settings);
@@ -190,7 +213,7 @@ public final class SettingsBuilder {
 	@Override
 	public String toString() {
 		return "SettingsBuilder [libraryPaths=" + libraryPaths + ", fieldMappers=" + fieldMappers + ", tagMappers="
-				+ tagMappers + ", jsdbDrivers=" + jdbcDrivers + "]";
+				+ tagMappers + ", jdbcDriver=" + jdbcDriver + ", jdbcUrl=" + jdbcUrl + "]";
 	}
 
 }

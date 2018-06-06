@@ -34,12 +34,32 @@ import ru.snake.jsdb.lib.settings.TableMapping;
 import ru.snake.jsdb.lib.settings.TagMapping;
 import ru.snake.jsdb.lib.wrapper.DriverWrapper;
 
-public class JsDbContextFactory {
+/**
+ * Factory class to create {@link JsDbContext} instance from settings.
+ *
+ * @author snake
+ *
+ */
+public final class JsDbContextFactory {
 
+	/**
+	 * Hides default constructor for factory class.
+	 */
 	private JsDbContextFactory() {
 	}
 
-	public static JsDbContext create(JsDbSettings settings, String connectionString) throws JsDbException {
+	/**
+	 * Create new instance of {@link JsDbContext} connected to given JDBC URL.
+	 *
+	 * @param settings
+	 *            JSDB settings
+	 * @param connectionString
+	 *            JDBC connection string
+	 * @return new JSDB context
+	 * @throws JsDbException
+	 *             if error occurred
+	 */
+	public static JsDbContext create(final JsDbSettings settings, final String connectionString) throws JsDbException {
 		settings.validate();
 
 		Set<String> libraryPaths = settings.getLibraryPaths();
@@ -53,15 +73,31 @@ public class JsDbContextFactory {
 		}
 	}
 
-	private static JsDbContext createContext(JsDbSettings settings, String connectionString, URLClassLoader classLoader)
-			throws DatabaseException, ClassLoadException {
-		Set<String> drivers = settings.getDrivers();
+	/**
+	 * Create new JSDB context using given settings and connection string. Class
+	 * loader will be used to load drivers and mappers from external libraries.
+	 *
+	 * @param settings
+	 *            valid JSDB setting
+	 * @param connectionString
+	 *            JDBC connection string
+	 * @param classLoader
+	 *            class loader
+	 * @return new JSDB context
+	 * @throws DatabaseException
+	 *             if connection to JSDB database failed
+	 * @throws ClassLoadException
+	 *             if class load failed
+	 */
+	private static JsDbContext createContext(final JsDbSettings settings, final String connectionString,
+			final URLClassLoader classLoader) throws DatabaseException, ClassLoadException {
+		String driver = settings.getDriver();
 
 		try {
 			Map<String, DbMappers> tableMappers = loadTableMappers(classLoader, settings);
 			DbMappers tagMappers = loadTagMappers(classLoader, settings);
 
-			loadJdbcDrivers(classLoader, drivers);
+			loadJdbcDriver(classLoader, driver);
 
 			Connection connection = createConnection(connectionString, classLoader);
 			String engineMimeType = settings.getEngineMimeType();
@@ -147,17 +183,32 @@ public class JsDbContextFactory {
 		return exception;
 	}
 
-	private static void loadJdbcDrivers(URLClassLoader classLoader, Set<String> drivers)
+	/**
+	 * Load JDBC driver into {@link DriverWrapper} and register wrapper class in
+	 * {@link DriverManager}.
+	 *
+	 * @param classLoader
+	 *            class loader to load JDBC driver
+	 * @param driverClassName
+	 *            JDBC driver class name
+	 * @throws ClassNotFoundException
+	 *             if class loader can't load driver class
+	 * @throws InstantiationException
+	 *             if driver class can not be created with default constructor
+	 * @throws IllegalAccessException
+	 *             if driver class is not accessible from class loader
+	 * @throws SQLException
+	 *             if driver registration failed
+	 */
+	private static void loadJdbcDriver(final URLClassLoader classLoader, final String driverClassName)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
-		for (String className : drivers) {
-			Class<?> driverClass = classLoader.loadClass(className);
+		Class<?> driverClass = classLoader.loadClass(driverClassName);
 
-			if (Driver.class.isAssignableFrom(driverClass)) {
-				Driver driver = (Driver) driverClass.newInstance();
-				DriverWrapper wrapper = new DriverWrapper(driver);
+		if (Driver.class.isAssignableFrom(driverClass)) {
+			Driver driver = (Driver) driverClass.newInstance();
+			DriverWrapper wrapper = new DriverWrapper(driver);
 
-				DriverManager.registerDriver(wrapper);
-			}
+			DriverManager.registerDriver(wrapper);
 		}
 	}
 
