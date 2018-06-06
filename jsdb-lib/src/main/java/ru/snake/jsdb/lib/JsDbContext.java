@@ -27,15 +27,36 @@ public final class JsDbContext implements AutoCloseable {
 		this.engine = engine;
 	}
 
-	public Object execute(String script) throws ScriptExecutionException {
+	/**
+	 * Execute the specified script from string value. Return script execution
+	 * result.
+	 *
+	 * @param script
+	 *            script
+	 * @return execution result
+	 * @throws ScriptExecutionException
+	 *             if runtime or script error occurred
+	 */
+	public Object execute(final String script) throws ScriptExecutionException {
 		try {
 			return engine.eval(script);
 		} catch (ScriptException e) {
 			throw new ScriptExecutionException(e);
+		} catch (RuntimeException e) {
+			throw new ScriptExecutionException(e);
 		}
 	}
 
-	public Object execute(Reader reader) throws ScriptExecutionException {
+	/**
+	 * Execute the specified script from reader. Return script execution result.
+	 *
+	 * @param reader
+	 *            reader
+	 * @return execution result
+	 * @throws ScriptExecutionException
+	 *             if runtime or script error occurred
+	 */
+	public Object execute(final Reader reader) throws ScriptExecutionException {
 		try {
 			return engine.eval(reader);
 		} catch (ScriptException e) {

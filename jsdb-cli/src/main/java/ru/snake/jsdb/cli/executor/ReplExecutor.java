@@ -22,6 +22,9 @@ public final class ReplExecutor extends AbstractExecutor {
 		this.in = in;
 	}
 
+	/**
+	 * Start REPL until given input stream opened.
+	 */
 	public void run() {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.in))) {
 			while (true) {
