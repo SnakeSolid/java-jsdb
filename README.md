@@ -90,3 +90,17 @@ db.execute("update schema.table set field = 3 where name = 'row'");
 ```
 
 Update operation returns number of changed rows as integer value.
+
+## Connection to JDBC database
+
+Example how to connect to PostgreSQL database using JDBC driver with JSDB CLI:
+
+```sh
+java -jar jsdb-cli/target/jsdb-cli-{version}-jar-with-dependencies.jar \ # where {version} - JSDB version
+  -l 'file:jsdb-cli/lib/postgresql-42.2.2.jar' \ # path to PostgreSQL driver
+  -d 'org.postgresql.Driver' \ # PostgreSQL JDBC driver class name
+  -u 'jdbc:postgresql://localhost:5432/postgres?user=username&password=paSSw0rd'
+```
+
+Parameters for connection (like user, password, SSL mode) can be passed through URL. Parameters follow after question
+mark (`?`) sign in format `param=value`. Every next parameter separated with ampersand (`&`) except for first.
