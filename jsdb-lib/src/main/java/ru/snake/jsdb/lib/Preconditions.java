@@ -1,46 +1,78 @@
 package ru.snake.jsdb.lib;
 
 import java.util.Collection;
-import java.util.Map;
 
+/**
+ * Preconditions checks to validate method parameters and results.
+ *
+ * @author snake
+ *
+ */
 public final class Preconditions {
 
+	/**
+	 * Hide public constructor.
+	 */
 	private Preconditions() {
 	}
 
-	public static void argument(boolean check, String message) {
+	/**
+	 * If check is false throws {@link IllegalArgumentException} with given
+	 * message.
+	 *
+	 * @param check
+	 *            check
+	 * @param message
+	 *            message
+	 */
+	public static void argument(final boolean check, final String message) {
 		if (!check) {
 			throw new IllegalArgumentException(message);
 		}
 	}
 
-	public static void argument(boolean check, String format, Object... args) {
-		if (!check) {
-			throw new IllegalArgumentException(String.format(format, args));
-		}
-	}
-
-	public static void argumentNotNull(Object value, String name) {
+	/**
+	 * If value is null throws {@link IllegalArgumentException} with message -
+	 * "argument must not be null".
+	 *
+	 * @param value
+	 *            value
+	 * @param name
+	 *            name
+	 */
+	public static void argumentNotNull(final Object value, final String name) {
 		if (value == null) {
 			throw new IllegalArgumentException(String.format("Argument %s must not be null", name));
 		}
 	}
 
-	public static void argumentNotEmpty(String value, String name) {
+	/**
+	 * If value is empty string throws {@link IllegalArgumentException} with
+	 * message - "argument must not be empty string".
+	 *
+	 * @param value
+	 *            value
+	 * @param name
+	 *            name
+	 */
+	public static void argumentNotEmpty(final String value, final String name) {
 		if (value.isEmpty()) {
 			throw new IllegalArgumentException(String.format("Argument %s must not be empty string", name));
 		}
 	}
 
-	public static void argumentNotEmpty(Collection<?> value, String name) {
+	/**
+	 * If value is empty collection throws {@link IllegalArgumentException} with
+	 * message - "argument must not be empty string".
+	 *
+	 * @param value
+	 *            value
+	 * @param name
+	 *            name
+	 */
+	public static void argumentNotEmpty(final Collection<?> value, final String name) {
 		if (value.isEmpty()) {
 			throw new IllegalArgumentException(String.format("Argument %s must not be empty collection", name));
-		}
-	}
-
-	public static void argumentNotEmpty(Map<?, ?> value, String name) {
-		if (value.isEmpty()) {
-			throw new IllegalArgumentException(String.format("Argument %s must not be empty map", name));
 		}
 	}
 

@@ -2,16 +2,32 @@ package ru.snake.jsdb.lib.db;
 
 import java.sql.Connection;
 
+import ru.snake.jsdb.lib.db.flow.AbstractDbFlow;
 import ru.snake.jsdb.lib.db.mapper.DbMappers;
-import ru.snake.jsdb.lib.db.processor.DbQueryPublisher;
+import ru.snake.jsdb.lib.flow.DbSource;
+import ru.snake.jsdb.lib.flow.DbVisitor;
 
-public final class DbCollection extends DbQueryPublisher {
+public final class DbCollection extends AbstractDbFlow<DbRow> {
 
-	private DbQueryBuilder builder;
+	private final Connection connection;
 
-	public DbCollection(Connection connection, DbMappers mappers, String collectionName) {
-		super(connection, mappers);
+	private final DbMappers mappers;
 
+	private final DbQueryBuilder builder;
+
+	/**
+	 * Create new instance of database table source.
+	 *
+	 * @param connection
+	 *            connection
+	 * @param mappers
+	 *            mappers
+	 * @param collectionName
+	 *            database table name
+	 */
+	public DbCollection(final Connection connection, final DbMappers mappers, final String collectionName) {
+		this.connection = connection;
+		this.mappers = mappers;
 		this.builder = new DbQueryBuilder(collectionName);
 	}
 
@@ -64,13 +80,15 @@ public final class DbCollection extends DbQueryPublisher {
 	}
 
 	@Override
-	protected String getQueryString() {
-		return this.builder.build();
+	public void accept(final DbVisitor<DbRow> visitor) {
+		DbSource<DbRow> source = new QueryDbSource(this.connection, this.mappers, this.builder.build());
+
+		source.accept(visitor);
 	}
 
 	@Override
 	public String toString() {
-		return "DbCollection [builder=" + builder + "]";
+		return "DbCollection [connection=" + connection + ", mappers=" + mappers + ", builder=" + builder + "]";
 	}
 
 }

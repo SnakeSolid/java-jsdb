@@ -1,4 +1,4 @@
-package ru.snake.jsdb.lib.db.processor;
+package ru.snake.jsdb.lib.db;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -6,30 +6,42 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import ru.snake.jsdb.lib.db.DbRow;
 import ru.snake.jsdb.lib.db.mapper.DbMappers;
+import ru.snake.jsdb.lib.flow.DbSource;
+import ru.snake.jsdb.lib.flow.DbVisitor;
 
-public abstract class DbQueryPublisher extends DbPublisher<DbRow> {
+public final class QueryDbSource implements DbSource<DbRow> {
 
 	private final Connection connection;
 
 	private final DbMappers mappers;
 
-	public DbQueryPublisher(Connection connection, DbMappers mappers) {
+	private final String query;
+
+	/**
+	 * Create new instance of query source.
+	 *
+	 * @param connection
+	 *            connection
+	 * @param mappers
+	 *            field mappers
+	 * @param query
+	 *            query string
+	 */
+	public QueryDbSource(final Connection connection, final DbMappers mappers, final String query) {
 		this.connection = connection;
 		this.mappers = mappers;
+		this.query = query;
 	}
 
 	@Override
-	public final void consume() {
-		String queryString = getQueryString();
-
+	public void accept(final DbVisitor<DbRow> visitor) {
 		try (Statement statement = this.connection.createStatement();
-				ResultSet resultSet = statement.executeQuery(queryString)) {
+				ResultSet resultSet = statement.executeQuery(this.query)) {
 			ResultSetMetaData metadata = resultSet.getMetaData();
 			int nColumns = metadata.getColumnCount();
 
-			while (!this.cancelled && resultSet.next()) {
+			while (!visitor.isCancelled() && resultSet.next()) {
 				DbRow row = new DbRow(2 * nColumns);
 
 				for (int index = 1; index <= nColumns; index += 1) {
@@ -45,20 +57,18 @@ public abstract class DbQueryPublisher extends DbPublisher<DbRow> {
 					}
 				}
 
-				fireNext(row);
+				visitor.acceptNext(row);
 			}
 
-			fireComplete();
+			visitor.complete();
 		} catch (SQLException readResultException) {
-			fireError(readResultException);
+			visitor.acceptError(readResultException);
 		}
 	}
 
-	protected abstract String getQueryString();
-
 	@Override
 	public String toString() {
-		return "DbQueryPublisher [connection=" + connection + "]";
+		return "QueryDbSource [connection=" + connection + ", mappers=" + mappers + ", query=" + query + "]";
 	}
 
 }
